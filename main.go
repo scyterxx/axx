@@ -23,18 +23,6 @@ type PackageParam struct {
 func main() {
 
 	port := os.Getenv("PORT")
-	if port == "" {
-        port = "8080" // Fallback untuk testing lokal
-    }
-
-    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(w, "Aplikasi Go Berhasil Dideploy!")
-    })
-
-    // Bind ke antarmuka dan port yang ditentukan oleh Heroku
-    fmt.Printf("Server starting on port %s\n", port)
-    http.ListenAndServe(":" + port, nil) 
-}
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 	router.POST("/otp", func(c *gin.Context) {
