@@ -1,21 +1,24 @@
-FROM heroku/heroku:20-build as build
+# --- STAGE 1: Build Aplikasi ---
+FROM golang:1.20-alpine AS builder
 
-COPY . /app
 WORKDIR /app
 
-# Setup buildpack
-RUN mkdir -p /tmp/buildpack/heroku/go /tmp/build_cache /tmp/env
-RUN curl https://buildpack-registry.s3.amazonaws.com/buildpacks/heroku/go.tgz | tar xz -C /tmp/buildpack/heroku/go
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
 
-#Execute Buildpack
-RUN STACK=heroku-20 /tmp/buildpack/heroku/go/bin/compile /app /tmp/build_cache /tmp/env
+COPY . .
 
-# Prepare final, minimal image
-FROM heroku/heroku:20
+# Build aplikasi Anda, pastikan outputnya sesuai dengan CMD di stage akhir
+# Sesuaikan 'go-getting-started' dengan nama executable yang Anda inginkan
+RUN go build -o /app/bin/go-getting-started .
 
-COPY --from=build /app /app
-ENV HOME /app
-WORKDIR /app
-RUN useradd -m heroku
-USER heroku
-CMD /app/bin/go-getting-started
+# --- STAGE 2: Jalankan Aplikasi ---
+FROM alpine:latest
+
+# Copy executable dari stage builder ke stage runtime
+COPY --from=builder /app/bin/go-getting-started /app/bin/go-getting-started
+
+# Definisikan perintah untuk menjalankan aplikasi saat container dimulai
+# Heroku akan secara otomatis menyuntikkan variabel lingkungan PORT saat runtime
+CMD ["/app/bin/go-getting-started"]
