@@ -25,6 +25,12 @@ func main() {
 	port := os.Getenv("PORT")
 	router := gin.Default()
 	router.Use(CORSMiddleware())
+	router.GET("/", func(c *gin.Context) {
+        c.JSON(http.StatusOK, gin.H{
+            "status": "success",
+            "message": "API Backend is running",
+        })
+    })
 	router.POST("/otp", func(c *gin.Context) {
 		var json RequestOtpParam
 		if err := c.ShouldBindJSON(&json); err == nil {
